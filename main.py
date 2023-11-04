@@ -77,7 +77,7 @@ async def main():
     try:
         frames_counter = 0
         while True:
-            fps = ada.lpack.getFPS()
+            fps = ada.lpack.getFPS() + 1
             time_ = perf_counter() - start
             if time_ > 1:
                 print(f'Time remained: {time_}')
