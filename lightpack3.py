@@ -53,10 +53,11 @@ class Lightpack:
         status = status.split(':')[1]
         return status
 
-    def getFPS(self):
+    def getFPS(self) -> int:
         cmd = 'getfps\n'
         self.connection.send(cmd.encode())
-        return self.__readResult()
+        return int(self.__readResult())
+
     def getColors(self):
         cmd = 'getcolors\n'
         self.connection.send(cmd.encode())
@@ -123,5 +124,3 @@ class Lightpack:
     def disconnect(self):
         self.unlock()
         self.connection.close()
-
-
