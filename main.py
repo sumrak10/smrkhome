@@ -84,8 +84,8 @@ async def main():
                 print(fps)
             sleep(1/fps)
             ada.update_leds()
-    except:
-        pass
+    except Exception as exc:
+        print(exc)
     ada.disconnect()
 
 
