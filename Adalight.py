@@ -45,7 +45,7 @@ class Adalight:
 
             fps = self.lpack.execute(Commands.GET_FPS) + 1
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
-
+            print(time_)
             # monitoring
             if time_ > 1:
                 print(f'Time remained: {time_}')
