@@ -48,13 +48,13 @@ class Lightpack:
         total_data.append(data.decode())
         return ''.join(total_data)
 
-    def execute(self, command: Command, save_rn: bool = False, save_output: bool = False):
-        self.connection.send(command.inp_text.encode())
+    def execute(self, command: Commands, save_rn: bool = False, save_output: bool = False):
+        self.connection.send(command.value.inp_text.encode())
         res = self.__readResult()
         if not save_rn:
             res = res.replace('\r\n', '')
         if not save_output:
-            res = res.replace(command.out_text, '')
+            res = res.replace(command.value.out_text, '')
         return res
     #
     # def getFPS(self) -> int:
