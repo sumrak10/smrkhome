@@ -50,7 +50,7 @@ class Adalight:
             time_ = perf_counter() - start
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
             if mode == 'ambilight':
-                fps = self.lpack.execute(Commands.GET_FPS) + 1
+                fps = int(self.lpack.execute(Commands.GET_FPS)) + 1
             else:
                 fps = 60
             # monitoring
