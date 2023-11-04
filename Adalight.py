@@ -51,13 +51,17 @@ class Adalight:
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
             if mode == 'ambilight':
                 fps = int(self.lpack.execute(Commands.GET_FPS)) + 1
+            elif mode == 'moodlamp':
+                fps = 20
+            elif mode == 'soundviz':
+                fps = 40
             else:
                 fps = 60
             # monitoring
             if time_ > 1:
                 print(f'Time remained: {time_}')
                 print(f'Frames in sec: {frames_counter}')
-                print(f'Current server FPS: {fps}')
+                print(f'Current FPS: {fps}')
                 print(f'Current mode: {mode}')
                 print()
                 start = perf_counter()
