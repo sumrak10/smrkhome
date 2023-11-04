@@ -44,7 +44,7 @@ class Adalight:
         frames_counter = 0
         while True:
             time_ = perf_counter() - start
-
+            print("executing commands")
             fps = self.lpack.execute(Commands.GET_FPS) + 1
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
             print(time_)
@@ -69,7 +69,7 @@ class Adalight:
 
     def update_leds(self) -> None:
         # get and parse data
-        colors_string = self.lpack.execute(Commands.GET_COLORS, save_rn = True, save_output = True)
+        colors_string = self.lpack.execute(Commands.GET_COLORS, save_rn=True, save_output=True)
         colors_list, self.__remaining = self.parse_colors_string(colors_string, self.__remaining)
         if colors_list is None:
             return None
