@@ -13,6 +13,7 @@ async def main():
         serial_port=settings.SERIAL_PORT,
         boudrate=settings.SERIAL_BAUDRATE
     )
+    print('Showing started')
     try:
         ada.show()
     except Exception as exc:
