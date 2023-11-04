@@ -56,7 +56,8 @@ class Lightpack:
     def getFPS(self) -> int:
         cmd = 'getfps\n'
         self.connection.send(cmd.encode())
-        return int(self.__readResult())
+        res = self.__readResult().replace('\r\n', '').replace('fps:', '')
+        return int(res)
 
     def getColors(self):
         cmd = 'getcolors\n'
