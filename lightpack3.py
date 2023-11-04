@@ -1,7 +1,8 @@
-from typing import Literal
 from enum import Enum
 from dataclasses import dataclass
 import socket
+
+from config import logger
 
 
 @dataclass
@@ -49,7 +50,6 @@ class Lightpack:
         return ''.join(total_data)
 
     def execute(self, command: Commands, save_rn: bool = False, save_output: bool = False):
-        print(f"sending command {command.value.inp_text}")
         cmd = command.value.inp_text + '\n'
         self.connection.send(cmd.encode())
         res = self.__readResult()

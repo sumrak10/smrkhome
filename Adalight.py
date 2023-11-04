@@ -1,9 +1,9 @@
-import logging
 from time import perf_counter, sleep
 
 from serial import Serial
 
 from lightpack3 import Lightpack, Commands
+from config import logger
 
 
 class Adalight:
@@ -15,13 +15,18 @@ class Adalight:
         self._serial_port = serial_port
         self._boudrate = boudrate
 
+        logger.info(f"Connecting to serial port {serial_port}")
         self._ser = Serial(serial_port)
-        print(f"Connected to serial port {serial_port}")
+        logger.info(f"Connected to serial port!")
         self._ser.baudrate = boudrate
 
+        logger.info(f"Connecting to Adalight server {server_host}:{server_port}")
         self.lpack = Lightpack(server_host, server_port, ledMap=None)
-        print(f"Connected to Adalight server {server_host}:{server_port}")
+        logger.info(f"Connected to Adalight server!")
+
+        logger.info(f"Wait Adalight handshake")
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
+        logger.info(f"It's Adalight device!")
 
         self.__remaining = ''
 
