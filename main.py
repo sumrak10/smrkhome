@@ -74,18 +74,22 @@ async def main():
         boudrate=settings.SERIAL_BAUDRATE
     )
     start = perf_counter()
-    # try:
-    while True:
-        fps = ada.lpack.getFPS()
-        time_ = perf_counter() - start
-        if time_ > 1:
-            print(time_)
-            start = perf_counter()
-            print(fps)
-        sleep(1/fps)
-        ada.update_leds()
-    # except Exception as exc:
-    #     print(exc)
+    try:
+        frames_counter = 0
+        while True:
+            fps = ada.lpack.getFPS()
+            time_ = perf_counter() - start
+            if time_ > 1:
+                print(f'Time remained: {time_}')
+                print(f'Frames in sec: {frames_counter}')
+                print(f'Current server FPS: {fps}')
+                start = perf_counter()
+                frames_counter = 0
+            ada.update_leds()
+            frames_counter += 1
+            sleep(1/fps)
+    except Exception as exc:
+        print(exc)
     ada.disconnect()
 
 
