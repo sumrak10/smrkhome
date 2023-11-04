@@ -15,9 +15,11 @@ class Adalight:
         self._boudrate = boudrate
 
         self._ser = Serial(serial_port)
+        print(f"Connected to serial port {serial_port}")
         self._ser.baudrate = boudrate
 
         self.lpack = Lightpack(server_host, server_port, ledMap=None)
+        print(f"Connected to Adalight server {server_host}:{server_port}")
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
 
         self.__remaining = ''
