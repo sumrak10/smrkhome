@@ -9,9 +9,15 @@ from config import logger
 
 class Adalight:
 
-    def __init__(self, server_host: str, server_port: int, led_count: int, serial_port: str, boudrate: int):
+    def __init__(self,
+                 server_host: str,
+                 server_port: int,
+                 led_count: int,
+                 serial_port: str,
+                 boudrate: int,
+                 post_process: list[Callable[[list[list[int, int, int]]], list[list[int, int, int]]]] | None = None):
         self.led_count = led_count
-        self._post_processing_functions_list = [self.death_zone()]
+        self._post_processing_functions_list = post_process or []
 
         self._serial_port = serial_port
         self._boudrate = boudrate
@@ -99,25 +105,6 @@ class Adalight:
 
         # sending request
         self._ser.write(header + colors_string)
-
-    @staticmethod
-    def death_zone(threshold: int = 30, by_every_param: bool = True) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
-        def make_black_if_light_low(color: list[int, int, int]) -> list[int, int, int]:
-            if by_every_param:
-                if color[0] < threshold and color[1] < threshold and color[2] < threshold:
-                    return [0, 0, 0]
-                else:
-                    return [color[0], color[1], color[2]]
-            else:
-                if color[0] + color[1] + color[2] < threshold:
-                    return [0, 0, 0]
-                else:
-                    return [color[0], color[1], color[2]]
-
-        def func(colors_list: list[list[int, int, int]]) -> list[list[int, int, int]]:
-            return list(map(make_black_if_light_low, colors_list))
-
-        return func
 
     @staticmethod
     def parse_colors_string(string_: str, remaining: str) -> tuple[list[list[int, int, int]], str]:
