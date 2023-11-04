@@ -50,7 +50,8 @@ class Lightpack:
 
     def execute(self, command: Commands, save_rn: bool = False, save_output: bool = False):
         print(f"sending command {command.value.inp_text}")
-        self.connection.send(command.value.inp_text.encode())
+        cmd = command.value.inp_text + '\n'
+        self.connection.send(cmd.encode())
         res = self.__readResult()
         if not save_rn:
             res = res.replace('\r\n', '')
