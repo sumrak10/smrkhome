@@ -16,7 +16,7 @@ class Adalight:
         self._ser = Serial(serial_port)
         self._ser.baudrate = boudrate
 
-        self.lpack = lightpack3.Lightpack(server_host, server_port)
+        self.lpack = lightpack3.Lightpack(server_host, server_port, ledMap=None)
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
 
         self.__remaining = ''
