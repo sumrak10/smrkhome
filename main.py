@@ -3,8 +3,6 @@ from time import perf_counter, sleep
 
 from serial import Serial
 
-import numpy as np
-
 import lightpack3
 
 
