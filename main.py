@@ -60,8 +60,8 @@ class Adalight:
 
 
 async def main():
-    lpack = lightpack3.Lightpack('127.0.0.1', 3636, )
-    ada = Adalight(led_count=59, port='COM9')
+    lpack = lightpack3.Lightpack('localhost', 3636, )
+    ada = Adalight(led_count=59, port='/dev/ttyUSB0')
     ada.connect()
     # try:
     i = 0
