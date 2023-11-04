@@ -45,23 +45,23 @@ class Adalight:
 
     def show(self):
         start = perf_counter()
-        frames_counter = 0
+        fps = 0
         while True:
             time_ = perf_counter() - start
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
             if mode == 'ambilight':
-                fps = int(self.lpack.execute(Commands.GET_FPS)) + 1
+                fps_limit = int(self.lpack.execute(Commands.GET_FPS)) + 1
             elif mode == 'moodlamp':
-                fps = 20
+                fps_limit = 20
             elif mode == 'soundviz':
-                fps = 40
+                fps_limit = 40
             else:
-                fps = 60
+                fps_limit = 60
             # monitoring
             if time_ > 1:
                 print(f'Time remained: {time_}')
-                print(f'Frames in sec: {frames_counter}')
                 print(f'Current FPS: {fps}')
+                print(f'Current FPS limit: {fps_limit}')
                 print(f'Current mode: {mode}')
                 print()
                 start = perf_counter()
@@ -69,10 +69,11 @@ class Adalight:
 
             # tick
             self.update_leds()
-            frames_counter += 1
+            fps += 1
 
-            # FPS correct
-            sleep(1 / fps)
+            # fps_limit correct
+            if fps > fps_limit:
+                sleep(1 / fps_limit)
 
     def update_leds(self) -> None:
         # get and parse data
