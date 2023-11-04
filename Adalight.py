@@ -1,3 +1,4 @@
+import logging
 from time import perf_counter, sleep
 
 from serial import Serial

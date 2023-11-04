@@ -49,6 +49,7 @@ class Lightpack:
         return ''.join(total_data)
 
     def execute(self, command: Commands, save_rn: bool = False, save_output: bool = False):
+        print(f"sending command {command.value.inp_text}")
         self.connection.send(command.value.inp_text.encode())
         res = self.__readResult()
         if not save_rn:
