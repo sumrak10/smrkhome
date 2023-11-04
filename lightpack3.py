@@ -1,3 +1,4 @@
+from time import sleep
 from enum import Enum
 from dataclasses import dataclass
 import socket
@@ -24,20 +25,24 @@ class Lightpack:
         self._host = host
         self._port = port
 
-        try:  # Try to connect to the server API
-            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.connection.connect((host, port))
-            print(self.__readResult())
-        except ConnectionRefusedError:
-            print('Lightpack API server is missing')
+        logger.info(f"Connecting to Adalight server {host}:{port}")
+        for i in range(5):
+            try:  # Try to connect to the server API
+                self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.connection.connect((host, port))
+                self.__readResult()
+                break
+            except ConnectionRefusedError:
+                logger.warning(f"Connection refused {i}")
+                sleep(1)
+        else:
+            raise ConnectionRefusedError()
+        logger.info(f"Connected to Adalight server!")
 
-    def refresh_connect(self):
-        try:  # Try to connect to the server API
-            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.connection.connect((self._host, self._port))
-            self.__readResult()
-        except ConnectionRefusedError:
-            return None
+    def refresh_connect(self) -> bool:
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection.connect((self._host, self._port))
+        self.__readResult()
 
     def disconnect(self):
         # self.unlock()

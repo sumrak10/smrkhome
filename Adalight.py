@@ -15,14 +15,12 @@ class Adalight:
         self._serial_port = serial_port
         self._boudrate = boudrate
 
-        logger.info(f"Connecting to serial port {serial_port}")
+        logger.info(f"Connecting to serial port {serial_port} with boudrate {boudrate}")
         self._ser = Serial(serial_port)
         logger.info(f"Connected to serial port!")
         self._ser.baudrate = boudrate
 
-        logger.info(f"Connecting to Adalight server {server_host}:{server_port}")
         self.lpack = Lightpack(server_host, server_port, ledMap=None)
-        logger.info(f"Connected to Adalight server!")
 
         logger.info(f"Wait Adalight handshake")
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
@@ -50,19 +48,18 @@ class Adalight:
         frames_counter = 0
         while True:
             time_ = perf_counter() - start
-            print("executing commands")
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
             if mode == 'ambilight':
                 fps = self.lpack.execute(Commands.GET_FPS) + 1
             else:
                 fps = 60
-            print(time_)
             # monitoring
             if time_ > 1:
                 print(f'Time remained: {time_}')
                 print(f'Frames in sec: {frames_counter}')
                 print(f'Current server FPS: {fps}')
                 print(f'Current mode: {mode}')
+                print()
                 start = perf_counter()
                 frames_counter = 0
 
