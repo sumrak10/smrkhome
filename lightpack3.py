@@ -61,7 +61,7 @@ class Lightpack:
         if not save_rn:
             res = res.replace('\r\n', '')
         if not save_output:
-            res = res.replace(command.value.out_text, '')
+            res = res.replace(command.value.out_text+':', '')
         return res
     #
     # def getFPS(self) -> int:
