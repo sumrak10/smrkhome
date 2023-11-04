@@ -1,4 +1,5 @@
 from time import perf_counter, sleep
+from typing import Callable
 
 from serial import Serial
 
@@ -10,7 +11,7 @@ class Adalight:
 
     def __init__(self, server_host: str, server_port: int, led_count: int, serial_port: str, boudrate: int):
         self.led_count = led_count
-        self._post_processing_functions_list = []
+        self._post_processing_functions_list = [self.death_zone()]
 
         self._serial_port = serial_port
         self._boudrate = boudrate
@@ -100,6 +101,19 @@ class Adalight:
         self._ser.write(header + colors_string)
 
     @staticmethod
+    def death_zone(threshold: int = 150) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
+        def make_black_if_light_low(color: list[int, int, int]) -> list[int, int, int]:
+            if color[0] + color[1] + color[2] > threshold:
+                return [color[0], color[1], color[2]]
+            else:
+                return [0, 0, 0]
+
+        def func(colors_list: list[list[int, int, int]]) -> list[list[int, int, int]]:
+            return list(map(make_black_if_light_low, colors_list))
+
+        return func
+
+    @staticmethod
     def parse_colors_string(string_: str, remaining: str) -> tuple[list[list[int, int, int]], str]:
         string_ = remaining + string_[7:]  # remove prefix
         remaining = string_.split('\r\n')[1]  # slice remaining
@@ -112,4 +126,3 @@ class Adalight:
             return None
         else:
             return list_, remaining
-
