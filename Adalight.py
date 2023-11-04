@@ -65,7 +65,7 @@ class Adalight:
                 print(f'Current mode: {mode}')
                 print()
                 start = perf_counter()
-                frames_counter = 0
+                fps = 0
 
             # tick
             self.update_leds()
