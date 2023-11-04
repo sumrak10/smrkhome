@@ -101,12 +101,18 @@ class Adalight:
         self._ser.write(header + colors_string)
 
     @staticmethod
-    def death_zone(threshold: int = 150) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
+    def death_zone(threshold: int = 30, by_every_param: bool = True) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
         def make_black_if_light_low(color: list[int, int, int]) -> list[int, int, int]:
-            if color[0] + color[1] + color[2] > threshold:
-                return [color[0], color[1], color[2]]
+            if by_every_param:
+                if color[0] < threshold and color[1] < threshold and color[2] < threshold:
+                    return [0, 0, 0]
+                else:
+                    return [color[0], color[1], color[2]]
             else:
-                return [0, 0, 0]
+                if color[0] + color[1] + color[2] < threshold:
+                    return [0, 0, 0]
+                else:
+                    return [color[0], color[1], color[2]]
 
         def func(colors_list: list[list[int, int, int]]) -> list[list[int, int, int]]:
             return list(map(make_black_if_light_low, colors_list))
