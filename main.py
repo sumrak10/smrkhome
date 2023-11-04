@@ -16,8 +16,8 @@ async def main():
     print('Showing started')
     try:
         ada.show()
-    except Exception as exc:
-        print(exc)
+    except KeyboardInterrupt:
+        print('Disconnecting...')
     ada.disconnect()
 
 
