@@ -4,82 +4,88 @@ from time import perf_counter, sleep
 from serial import Serial
 
 import lightpack3
-
-
-def parse_colors_string(string_: str) -> tuple[str, list[tuple[int, int, int]]]:
-    try:
-        string_ = string_[7:]  # remove prefix
-        string_ = string_.replace('\r\n', '')
-        list_ = list(filter(lambda x: len(x) > 0, string_.split(';')))  # remove empty elements
-        list_ = list(map(lambda x: x.split('-')[1].split(','), list_))  # split string to r,g,b list
-        list_ = list(map(lambda x: list(map(lambda y: int(y), x)), list_))  # make from list -> tuple and parse to int
-    except Exception as exc:
-        print(exc)
-        print(string_)
-        return None
-    else:
-        return list_
+from config import settings
 
 
 class Adalight:
 
-    def __init__(self, led_count: int, port: str):
-        self._port = port
-        self._ser = None
+    def __init__(self, server_host: str, server_port: int, led_count: int, serial_port: str, boudrate: int):
         self.led_count = led_count
+        self._post_processing_functions_list = []
 
-    def connect(self) -> None:
-        if isinstance(self._ser, Serial) and self._ser.is_open:
-            self._ser.close()
+        self._ser = Serial(serial_port)
+        self._ser.baudrate = boudrate
 
-        assert self._port is not None, "Port is not set!"
-
-        self._ser = Serial(self._port, 115200)
+        self.lpack = lightpack3.Lightpack(server_host, server_port)
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
 
+        self.__remaining = ''
+
     def disconnect(self) -> None:
-        if isinstance(self._ser, Serial) and self._ser.is_open:
-            self._ser.close()
-        self._ser = None
+        self.__remaining = ''
+        self.lpack.connection.close()
+        self._ser.close()
 
-    def writeZones(self, zones: list) -> None:
-        if not isinstance(self._ser, Serial) or not self._ser.is_open: return
-        self._ser.write(self.mkHeader() + self.mkPayload(zones))
+    def update_leds(self) -> None:
+        # get and parse data
+        colors_string = self.lpack.getColors()
+        colors_list, self.__remaining = self.parse_colors_string(colors_string, self.__remaining)
+        if colors_list is None:
+            return None
 
-    def mkHeader(self) -> bytes:
+        # post processing data
+        for func in self._post_processing_functions_list:
+            colors_list = func(colors_list)
+
+        # make header for request
         hi = (self.led_count << 8) & 0xff
         lo = self.led_count & 0xff
-
         check = int.to_bytes(hi ^ lo ^ 0x55, 1, "big")
         hi = int.to_bytes(hi, 1, "big")
         lo = int.to_bytes(lo, 1, "big")
-        return b"Ada" + hi + lo + check
+        header = b"Ada" + hi + lo + check
 
-    def mkPayload(self, zones: list) -> bytes:
-        return b"".join([bytes(px) for px in zones])
+        colors_string = b"".join([bytes(px) for px in colors_list])
+
+        # sending request
+        self._ser.write(header + colors_string)
+
+    @staticmethod
+    def parse_colors_string(string_: str, remaining: str) -> tuple[list[list[int, int, int]], str]:
+        string_ = remaining + string_[7:]  # remove prefix
+        remaining = string_.split('\r\n')[1]  # slice remaining
+        string_ = string_.split('\r\n')[0]  # slice main part
+        try:
+            list_ = list(filter(lambda x: len(x) > 0, string_.split(';')))  # remove empty elements
+            list_ = list(map(lambda x: x.split('-')[1].split(','), list_))  # split string to r,g,b list
+            list_ = list(map(lambda x: list(map(lambda y: int(y), x)), list_))  # parse to int
+        except IndexError as exc:
+            return None
+        else:
+            return list_, remaining
 
 
 async def main():
-    lpack = lightpack3.Lightpack('192.168.1.3', 3636, )
-    ada = Adalight(led_count=59, port='/dev/ttyUSB0')
-    ada.connect()
-    # try:
-    i = 0
+    ada = Adalight(
+        server_host=settings.ADALIGHT_SERVER_HOST,
+        server_port=settings.ADALIGHT_SERVER_PORT,
+        led_count=settings.LED_COUNT,
+        serial_port=settings.SERIAL_PORT,
+        boudrate=settings.SERIAL_BAUDRATE
+    )
     start = perf_counter()
-    while True:
-        if i % 60 == 0:
-            i = 0
-            print(perf_counter() - start)
-            start = perf_counter()
-            fps = lpack.getFPS()
-            print(fps)
-        s = lpack.getColors()
-        s = parse_colors_string(s)
-        if s is None:
-            continue
-        ada.writeZones(s)
-    # except Exception as exc:
-    #     print(exc)
+    try:
+        while True:
+            fps = ada.lpack.getFPS()
+            time_ = perf_counter() - start
+            if time_ > 1:
+                print(time_)
+                start = perf_counter()
+                print(fps)
+            sleep(1/fps)
+            ada.update_leds()
+    except:
+        pass
     ada.disconnect()
 
 
