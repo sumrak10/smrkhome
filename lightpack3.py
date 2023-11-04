@@ -26,7 +26,7 @@ class Lightpack:
         try:  # Try to connect to the server API
             self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.connection.connect((host, port))
-            self.__readResult()
+            print(self.__readResult())
         except ConnectionRefusedError:
             print('Lightpack API server is missing')
 
