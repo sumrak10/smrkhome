@@ -46,8 +46,11 @@ class Adalight:
         while True:
             time_ = perf_counter() - start
             print("executing commands")
-            fps = self.lpack.execute(Commands.GET_FPS) + 1
             mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
+            if mode == 'ambilight':
+                fps = self.lpack.execute(Commands.GET_FPS) + 1
+            else:
+                fps = 60
             print(time_)
             # monitoring
             if time_ > 1:
@@ -63,10 +66,7 @@ class Adalight:
             frames_counter += 1
 
             # FPS correct
-            if mode == 'ambilight':
-                sleep(1 / fps)
-            elif mode == 'moodlamp':
-                sleep(1 / 60)
+            sleep(1 / fps)
 
     def update_leds(self) -> None:
         # get and parse data
