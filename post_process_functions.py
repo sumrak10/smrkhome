@@ -1,7 +1,7 @@
 from typing import Callable
 
 
-def death_zone(threshold: int = 30) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
+def death_zone(threshold: int = 15) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
     """
     Возвращает полностью черный цвет если все каналы ниже порога threshold
     """
@@ -18,17 +18,25 @@ def death_zone(threshold: int = 30) -> Callable[[list[list[int, int, int]]], lis
     return func
 
 
-def white_limit(led_count: int) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
-    max_br = led_count * 600
+def white_limit(led_count: int, max_limit: int) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
+    max_brightness = led_count * max_limit * 3
 
     def post_process(colors: list[list[int, int, int]]) -> list[list[int, int, int]]:
-        br = 0
-        limit = 0
-        for color in colors:
-            br += sum(color)
-            if br >= max_br:
-                limit = round((max_br - br) / 3)
-        colors = list(map(lambda channels: list(map(lambda channel: channel - limit, channels)), colors))
+        all_leds_brightness = sum(map(lambda channels: sum(channels), colors))
+        if all_leds_brightness >= max_brightness:
+            limit = round((all_leds_brightness - max_brightness) / 3)
+            for i, color in enumerate(colors):
+                if sum(color) > max_limit * 3:
+                    r = color[0] - limit
+                    if r < 0:
+                        r = 0
+                    g = color[1] - limit
+                    if g < 0:
+                        g = 0
+                    b = color[2] - limit
+                    if b < 0:
+                        b = 0
+                    colors[i] = [r, g, b]
         return colors
 
     def func(colors_list: list[list[int, int, int]]) -> list[list[int, int, int]]:
