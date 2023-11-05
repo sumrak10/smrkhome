@@ -3,7 +3,7 @@ from typing import Callable
 
 from serial import Serial
 
-from lightpack3 import Lightpack, Commands
+from lightpack3 import Lightpack
 from config import logger
 
 
@@ -27,13 +27,11 @@ class Adalight:
         logger.info(f"Connected to serial port!")
         self._ser.baudrate = boudrate
 
-        self.lpack = Lightpack(server_host, server_port, ledMap=None)
+        self.lpack = Lightpack(server_host, server_port, led_count, ledMap=None)
 
         logger.info(f"Wait Adalight handshake")
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
         logger.info(f"It's Adalight device!")
-
-        self.__remaining = ''
 
     def refresh_connect(self) -> None:
         self._ser = Serial(self._serial_port)
@@ -43,10 +41,7 @@ class Adalight:
 
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
 
-        self.__remaining = ''
-
     def disconnect(self) -> None:
-        self.__remaining = ''
         self.lpack.disconnect()
         self._ser.close()
 
@@ -55,15 +50,8 @@ class Adalight:
         fps = 0
         while True:
             time_ = perf_counter() - start
-            mode = self.lpack.execute(Commands.GET_MODE)  # 'ambilight', 'moodlamp'
-            if mode == 'ambilight':
-                fps_limit = int(self.lpack.execute(Commands.GET_FPS)) + 1
-            elif mode == 'moodlamp':
-                fps_limit = 20
-            elif mode == 'soundviz':
-                fps_limit = 40
-            else:
-                fps_limit = 60
+            mode = self.lpack.get_mode()  # 'ambilight', 'moodlamp'
+            fps_limit = int(self.lpack.get_fps(mode)) + 1
             # monitoring
             if time_ > 1:
                 print(f'Time remained: {time_}')
@@ -83,9 +71,8 @@ class Adalight:
                 sleep(1 / fps_limit)
 
     def update_leds(self) -> None:
-        # get and parse data
-        colors_string = self.lpack.execute(Commands.GET_COLORS, save_rn=True, save_output=True)
-        colors_list, self.__remaining = self.parse_colors_string(colors_string, self.__remaining)
+        # get data
+        colors_list = self.lpack.get_colors()
         if colors_list is None:
             return None
 
@@ -105,17 +92,3 @@ class Adalight:
 
         # sending request
         self._ser.write(header + colors_string)
-
-    @staticmethod
-    def parse_colors_string(string_: str, remaining: str) -> tuple[list[list[int, int, int]], str]:
-        string_ = remaining + string_[7:]  # remove prefix
-        remaining = string_.split('\r\n')[1]  # slice remaining
-        string_ = string_.split('\r\n')[0]  # slice main part
-        try:
-            list_ = list(filter(lambda x: len(x) > 0, string_.split(';')))  # remove empty elements
-            list_ = list(map(lambda x: x.split('-')[1].split(','), list_))  # split string to r,g,b list
-            list_ = list(map(lambda x: list(map(lambda y: int(y), x)), list_))  # parse to int
-        except IndexError as exc:
-            return None
-        else:
-            return list_, remaining
