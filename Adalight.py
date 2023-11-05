@@ -33,13 +33,15 @@ class Adalight:
         assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
         logger.info(f"It's Adalight device!")
 
-    def refresh_connect(self) -> None:
-        self._ser = Serial(self._serial_port)
-        self._ser.baudrate = self._boudrate
+    def refresh_connect(self) -> bool:
+        status = self.lpack.refresh_connect()
 
-        self.lpack.refresh_connect()
+        if not self._ser.isOpen():
+            self._ser = Serial(self._serial_port)
+            self._ser.baudrate = self._boudrate
+            assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
 
-        assert self._ser.read(4) == b"Ada\n", "This is not adalight device!"
+        return status
 
     def disconnect(self) -> None:
         self.lpack.disconnect()
@@ -48,8 +50,8 @@ class Adalight:
     def show(self):
         start = perf_counter()
         fps = 0
-        try:
-            while True:
+        while True:
+            try:
                 time_ = perf_counter() - start
                 mode = self.lpack.get_mode()  # 'ambilight', 'moodlamp'
                 # fps_limit = int(self.lpack.get_fps(mode)) + 1
@@ -71,11 +73,17 @@ class Adalight:
                 # fps_limit correct
                 if fps > fps_limit:
                     sleep(1 / fps_limit)
-        except ConnectionResetError:
-            for i in range(25):
-                self.refresh_connect()
-                sleep(1)
-            raise ConnectionRefusedError()
+
+            except ConnectionResetError:
+                print('Try to reconnect')
+                for _ in range(25):
+                    status = self.refresh_connect()
+                    if status:
+                        break
+                    sleep(1)
+                else:
+                    raise ConnectionRefusedError()
+                self.show()
 
     def update_leds(self) -> None:
         # get data
