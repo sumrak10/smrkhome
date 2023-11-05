@@ -24,7 +24,7 @@ def white_limit(led_count: int, max_avg_brightness: int) -> Callable[[list[list[
     def post_process(colors: list[list[int, int, int]]) -> list[list[int, int, int]]:
         avg_brightness = mean(map(lambda channels: mean(channels), colors))
         if avg_brightness >= max_avg_brightness:
-            limit = avg_brightness - max_avg_brightness
+            limit = round(avg_brightness - max_avg_brightness)
             for i, color in enumerate(colors):
                 # if mean(color) > max_brightness:
                 r = color[0] - limit
