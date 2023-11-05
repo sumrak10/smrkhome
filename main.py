@@ -1,5 +1,5 @@
 from Adalight import Adalight
-from post_process_functions import death_zone, change_brightness
+from post_process_functions import death_zone, white_limit
 from config import settings
 
 
@@ -10,7 +10,7 @@ if __name__ == '__main__':
         led_count=settings.LED_COUNT,
         serial_port=settings.SERIAL_PORT,
         boudrate=settings.SERIAL_BAUDRATE,
-        post_process=[death_zone(), change_brightness()]
+        post_process=[death_zone(), white_limit()]
     )
     try:
         ada.show()

@@ -18,26 +18,20 @@ def death_zone(threshold: int = 30) -> Callable[[list[list[int, int, int]]], lis
     return func
 
 
-def change_brightness(value: int = -30) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
-    def post_process(color: list[int, int, int]) -> list[int, int, int]:
-        r = color[0] + value
-        g = color[1] + value
-        b = color[2] + value
-        if r < 0:
-            r = 0
-        if r > 255:
-            r = 255
-        if g < 0:
-            g = 0
-        if g > 255:
-            g = 255
-        if b < 0:
-            b = 0
-        if b > 255:
-            b = 255
-        return [r, g, b]
+def white_limit(led_count: int) -> Callable[[list[list[int, int, int]]], list[list[int, int, int]]]:
+    max_br = led_count * 600
+
+    def post_process(colors: list[list[int, int, int]]) -> list[list[int, int, int]]:
+        br = 0
+        limit = 0
+        for color in colors:
+            br += sum(color)
+            if br >= max_br:
+                limit = round((max_br - br) / 3)
+        colors = list(map(lambda channels: list(map(lambda channel: channel - limit, channels)), colors))
+        return colors
 
     def func(colors_list: list[list[int, int, int]]) -> list[list[int, int, int]]:
-        return list(map(post_process, colors_list))
+        return post_process(colors_list)
 
     return func
