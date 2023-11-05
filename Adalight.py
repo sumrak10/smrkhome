@@ -51,7 +51,8 @@ class Adalight:
         while True:
             time_ = perf_counter() - start
             mode = self.lpack.get_mode()  # 'ambilight', 'moodlamp'
-            fps_limit = int(self.lpack.get_fps(mode)) + 1
+            # fps_limit = int(self.lpack.get_fps(mode)) + 1
+            fps_limit = 40
             # monitoring
             if time_ > 1:
                 print(f'Time remained: {time_}')

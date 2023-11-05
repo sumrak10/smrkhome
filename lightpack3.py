@@ -1,16 +1,8 @@
 from time import sleep
-from enum import Enum
-from dataclasses import dataclass
 import socket
 from typing import Literal
 
 from config import logger
-
-
-@dataclass
-class Command:
-    inp_text: str
-    out_text: str
 
 
 class Lightpack:
@@ -81,7 +73,8 @@ class Lightpack:
             res = res.replace(command_text.replace('get', '') + ':', '')
         return res
 
-    def _set(self, command_text: str, setting_value: str | None = None, original: bool = False, lock_if_not: bool = True) -> str:
+    def _set(self, command_text: str, setting_value: str | None = None, original: bool = False,
+             lock_if_not: bool = True) -> str:
         if not self.is_locked and lock_if_not:
             self.lock()
         if setting_value is not None:
@@ -170,15 +163,15 @@ class Lightpack:
         """
         Возвращает цвет, выводимый на светодиоды в настоящий момент времени в формате R, G, B.
         Где R, G, B -- соответствующие цветовые компоненты.
-        """  
+        """
         # 1  ---  colors:1,2,3;1,2,3;\r\n\                ->      main: + remaining: -
         # 2  ---  colors:1,2,3;1,2,3;\r\n\colors:1,2,     ->      main: + remaining: +
         # 3  ---  3;1,2,3;\r\n\colors:1,2                 ->      main: + remaining: -
         # 4  ---  ,3;1,2,3;                               ->      main: + remaining: -
-        all_string = self.colors_remaining+self._get('getcolors', True)
+        all_string = self.colors_remaining + self._get('getcolors', True)
         main_string = ''
         remaining_string = ''
-        
+
         if all_string.startswith('colors:') and all_string.endswith('\r\n'):
             main_string = all_string.replace('colors:', '').replace('\r\n', '')
         elif all_string.startswith('colors:'):
