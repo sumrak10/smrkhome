@@ -30,7 +30,7 @@ class Lightpack:
             raise ConnectionRefusedError()
         logger.info(f"Connected to Adalight server!")
 
-    def refresh_connect(self) -> bool:
+    def refresh_connect(self) -> None:
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self._host, self._port))
         self.__readResult()

@@ -48,28 +48,34 @@ class Adalight:
     def show(self):
         start = perf_counter()
         fps = 0
-        while True:
-            time_ = perf_counter() - start
-            mode = self.lpack.get_mode()  # 'ambilight', 'moodlamp'
-            # fps_limit = int(self.lpack.get_fps(mode)) + 1
-            fps_limit = 40
-            # monitoring
-            if time_ > 1:
-                print(f'Time remained: {time_}')
-                print(f'Current FPS: {fps}')
-                print(f'Current FPS limit: {fps_limit}')
-                print(f'Current mode: {mode}')
-                print()
-                start = perf_counter()
-                fps = 0
+        try:
+            while True:
+                time_ = perf_counter() - start
+                mode = self.lpack.get_mode()  # 'ambilight', 'moodlamp'
+                # fps_limit = int(self.lpack.get_fps(mode)) + 1
+                fps_limit = 40
+                # monitoring
+                if time_ > 1:
+                    print(f'Time remained: {time_}')
+                    print(f'Current FPS: {fps}')
+                    print(f'Current FPS limit: {fps_limit}')
+                    print(f'Current mode: {mode}')
+                    print()
+                    start = perf_counter()
+                    fps = 0
 
-            # tick
-            self.update_leds()
-            fps += 1
+                # tick
+                self.update_leds()
+                fps += 1
 
-            # fps_limit correct
-            if fps > fps_limit:
-                sleep(1 / fps_limit)
+                # fps_limit correct
+                if fps > fps_limit:
+                    sleep(1 / fps_limit)
+        except ConnectionResetError:
+            for i in range(25):
+                self.refresh_connect()
+                sleep(1)
+            raise ConnectionRefusedError()
 
     def update_leds(self) -> None:
         # get data
