@@ -22,6 +22,8 @@ class Adalight:
         self._serial_port = serial_port
         self._boudrate = boudrate
 
+        self.reconnect_tries = 25
+
         logger.info(f"Connecting to serial port {serial_port} with boudrate {boudrate}")
         self._ser = Serial(serial_port)
         logger.info(f"Connected to serial port!")
@@ -75,8 +77,8 @@ class Adalight:
                     sleep(1 / fps_limit)
 
             except ConnectionResetError:
-                for i in range(25):
-                    print(f'Try to reconnect {i}')
+                for i in range(self.reconnect_tries):
+                    print(f'Try to reconnect {i} / {self.reconnect_tries}')
                     status = self.refresh_connect()
                     if status:
                         break
