@@ -10,7 +10,7 @@ if __name__ == '__main__':
         led_count=settings.LED_COUNT,
         serial_port=settings.SERIAL_PORT,
         boudrate=settings.SERIAL_BAUDRATE,
-        post_process=[death_zone(), white_limit()]
+        post_process=[death_zone(), white_limit(settings.LED_COUNT)]
     )
     try:
         ada.show()
