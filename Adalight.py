@@ -75,8 +75,8 @@ class Adalight:
                     sleep(1 / fps_limit)
 
             except ConnectionResetError:
-                print('Try to reconnect')
-                for _ in range(25):
+                for i in range(25):
+                    print(f'Try to reconnect {i}')
                     status = self.refresh_connect()
                     if status:
                         break
