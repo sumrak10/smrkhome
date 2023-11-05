@@ -78,7 +78,7 @@ class Adalight:
 
             except ConnectionResetError:
                 for i in range(self.reconnect_tries):
-                    print(f'Try to reconnect {i} / {self.reconnect_tries}')
+                    print(f'Try to reconnect {i+1} / {self.reconnect_tries}')
                     status = self.refresh_connect()
                     if status:
                         break
